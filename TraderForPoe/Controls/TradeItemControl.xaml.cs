@@ -23,6 +23,8 @@ namespace TraderForPoe
 
         private static int intNumberItems = 0;
 
+        private static int intNumberItemsForControlBar = 1;
+        
         public static event EventHandler MoreThanThreeItems;
 
         public static event EventHandler EqualThreeItems;
@@ -40,6 +42,8 @@ namespace TraderForPoe
 
         public TradeItem tItem;
 
+        public string chatHistory = "";
+        
         Stopwatch stopwatch = new Stopwatch();
 
         //-----------------------------------------------------------------------------------------
@@ -50,14 +54,13 @@ namespace TraderForPoe
 
             intNumberItems++;
 
-            if (intNumberItems > 3)
+            if (intNumberItems >= intNumberItemsForControlBar)
             {
                 OnMoreThanThreeItems();
             }
 
             InitializeComponent();
-
-
+            
             LoadSettings();
 
             SetupControls(tItem);
@@ -135,9 +138,12 @@ namespace TraderForPoe
 
             if (tItem.TradeType == TradeItem.TradeTypes.BUY)
             {
+                //#d1
+                txt_League.Visibility = Visibility.Collapsed; 
+                btn_StartTrade.Visibility = Visibility.Visible;
+                
                 txt_Item.Foreground = System.Windows.Media.Brushes.GreenYellow;
                 btn_InviteCustomer.Visibility = Visibility.Collapsed;
-                btn_StartTrade.Visibility = Visibility.Collapsed;
                 btn_SearchItem.Visibility = Visibility.Collapsed;
                 btn_AskIfInterested.Visibility = Visibility.Collapsed;
                 btn_SendBusyMessage.Visibility = Visibility.Collapsed;
@@ -146,6 +152,9 @@ namespace TraderForPoe
 
             else if (tItem.TradeType == TradeItem.TradeTypes.SELL)
             {
+                //#d1
+                txt_League.Visibility = Visibility.Collapsed;
+                
                 txt_Item.Foreground = System.Windows.Media.Brushes.OrangeRed;
                 btn_VisitCustomerHideout.Visibility = Visibility.Collapsed;
                 btn_VisitOwnHideout.Visibility = Visibility.Collapsed;
@@ -412,7 +421,7 @@ namespace TraderForPoe
             RemoveItem();
         }
 
-        private void RemoveItem()
+        public void RemoveItem()
         {
             ((StackPanel)Parent).Children.Remove(this);
             stashGridHighlight.RemoveStashControl(tItem);
@@ -536,7 +545,7 @@ namespace TraderForPoe
         {
             intNumberItems--;
 
-            if (intNumberItems == 3)
+            if (intNumberItems < intNumberItemsForControlBar)
             {
                 OnEqualThreeItems();
             }
@@ -555,6 +564,8 @@ namespace TraderForPoe
         public void CustomerJoined()
         {
             txt_Customer.Foreground = Brushes.GreenYellow;
+            SoundPlayer player = new SoundPlayer(Properties.Resources.customer);
+            player.Play();
         }
         public void CustomerLeft()
         {

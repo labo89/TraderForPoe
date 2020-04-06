@@ -49,6 +49,10 @@
 
         </Style>
 
+        <Style TargetType="ToolTip">
+            <Setter Property="TextBlock.TextAlignment" Value="Left"/>
+        </Style>
+        
         <Style x:Key="CmdStyle" BasedOn="{StaticResource BtnStyle}" TargetType="Button">
             <Setter Property="Width" Value="20"/>
         </Style>

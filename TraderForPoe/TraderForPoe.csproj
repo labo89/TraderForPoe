@@ -38,7 +38,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -47,7 +47,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -318,6 +318,12 @@
   <ItemGroup>
     <Resource Include="Resources\Images\customMessage3.png" />
     <Resource Include="Resources\Images\customMessage4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\customer.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\error.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.4.0.0\build\Fody.targets" Condition="Exists('..\packages\Fody.4.0.0\build\Fody.targets')" />

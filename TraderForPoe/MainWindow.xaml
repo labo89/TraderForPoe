@@ -38,17 +38,23 @@
         <Style BasedOn="{StaticResource BtnStyle}" TargetType="Button"/>
     </Window.Resources>
 
-
+    
     <StackPanel Orientation="Horizontal">
-        <StackPanel x:Name="stk_MainPnl" MouseDown="Window_MouseDown" CanVerticallyScroll="True">
-            <StackPanel.Resources>
-                <Style TargetType="{x:Type local:TradeItemControl}">
-                    <Setter Property="Margin" Value="0,0,2,2"/>
-                </Style>
-            </StackPanel.Resources>
-        </StackPanel>
-        <Border Name="brd_collapseMainWindow" Visibility="Collapsed" BorderBrush="#474747" BorderThickness="1"  Margin="0,0,0,2">
-            <Button  Width="20" Visibility="Collapsed" VerticalAlignment="Stretch" Name="btn_collapseMainWindow" Click="ClickCollapseExpandMainwindow">⏶</Button>
+        <Border Name="brd_collapseMainWindow" Visibility="Collapsed" VerticalAlignment="Top" BorderBrush="#474747" BorderThickness="1"  Margin="0,0,0,2" MaxHeight="40">
+            <StackPanel x:Name="stk_ControlPnl">
+                <Button  Width="20" Visibility="Visible" VerticalAlignment="Top" Name="btn_collapseMainWindow" Click="ClickCollapseExpandMainwindow">^</Button>                
+                <Button  Width="20" Visibility="Visible" VerticalAlignment="Top" Name="btn_clearRecords" Click="ClickClearRecords">X</Button>
+            </StackPanel>
         </Border>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Height="330">
+            <StackPanel x:Name="stk_MainPnl" MouseDown="Window_MouseDown" CanVerticallyScroll="True">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type local:TradeItemControl}">
+                            <Setter Property="Margin" Value="0,0,2,2"/>
+                        </Style>
+                    </StackPanel.Resources>
+            </StackPanel>
+        </ScrollViewer>
     </StackPanel>
+            
 </Window>

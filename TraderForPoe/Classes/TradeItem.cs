@@ -104,7 +104,7 @@ namespace TraderForPoe
 
 
         // Constructor
-        public TradeItem(string whisper)
+        public TradeItem(string whisper, bool store = true)
         {
             WhisperMessage = whisper;
 
@@ -116,8 +116,9 @@ namespace TraderForPoe
             {
                 throw new TradeItemExistsException("Item exists");
             }
-
-            lstTradeItems.Add(this);
+            
+            if(store)
+                lstTradeItems.Add(this);
         }
 
         // Set property TradeType

@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Media;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -71,6 +75,8 @@ namespace TraderForPoe
 
         public MainWindow()
         {
+            CheckRunning();
+            
             CheckForUpdates();
 
             SubscribeToEvents();
@@ -86,7 +92,17 @@ namespace TraderForPoe
             StartFileMonitoring();
         }
 
-
+        private void CheckRunning()
+        {
+            bool result;
+            var mutex = new System.Threading.Mutex(true, Assembly.GetExecutingAssembly().GetName().ToString(), out result);
+            if (!result)
+            {
+                MessageBox.Show("Another instance of the application is already running!");
+                Application.Current.Shutdown();
+            }
+            GC.KeepAlive(mutex);
+        }
 
         private void CheckForUpdates()
         {
@@ -148,14 +164,16 @@ namespace TraderForPoe
 
         private void TradeItemControl_MoreThanThreeItems(object sender, EventArgs e)
         {
-            btn_collapseMainWindow.Visibility = Visibility.Visible;
+            stk_ControlPnl.Visibility = Visibility.Visible;
             brd_collapseMainWindow.Visibility = Visibility.Visible;
+            //btn_collapseMainWindow.Visibility = Visibility.Visible;
         }
 
         private void TradeItemControl_LessThanThreeItems(object sender, EventArgs e)
         {
-            btn_collapseMainWindow.Visibility = Visibility.Collapsed;
+            stk_ControlPnl.Visibility = Visibility.Collapsed;
             brd_collapseMainWindow.Visibility = Visibility.Collapsed;
+            //btn_collapseMainWindow.Visibility = Visibility.Collapsed;
         }
 
         private void LoadSetting()
@@ -210,8 +228,26 @@ namespace TraderForPoe
 
             if (strClipboard.StartsWith("@"))
             {
+                bool sendCustomWhisper3 = Keyboard.IsKeyDown(Key.RightCtrl);
+                bool sendCustomWhisper4 = Keyboard.IsKeyDown(Key.LeftCtrl);
+                
+                try
+                {
+                    string message = Regex.Replace(strClipboard, @"^\@(.+?)\s+(.+)$",
+                        match => ("@To " + match.Groups[1].Value + ": " + match.Groups[2].Value));
+
+                    TradeItem tItem = new TradeItem(message, false);
+                }
+                catch
+                {
+                    SoundPlayer player = new SoundPlayer(Properties.Resources.error);
+                    player.Play();
+                    return;
+                }
+                
                 // Get a handle to POE. The window class and window name were obtained using the Spy++ tool.
                 IntPtr poeHandle = FindWindow("POEWindowClass", "Path of Exile");
+                    
                 // Verify that POE is a running process.
                 if (poeHandle == IntPtr.Zero)
                 {
@@ -229,14 +265,26 @@ namespace TraderForPoe
                 SetForegroundWindow(poeHandle);
 
                 Thread.Sleep(100);
-
+                    
                 iSim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-
-                // Send the input
                 iSim.Keyboard.TextEntry(strClipboard);
-
-                // Send RETURN
                 iSim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+
+                if (sendCustomWhisper3)
+                {
+                    Thread.Sleep(100);
+                    iSim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                    iSim.Keyboard.TextEntry(Settings.Default.CustomWhisper3);
+                    iSim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                }
+                
+                if (sendCustomWhisper4)
+                {
+                    Thread.Sleep(100);
+                    iSim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                    iSim.Keyboard.TextEntry(Settings.Default.CustomWhisper4);
+                    iSim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                }
 
                 iSim = null;
 
@@ -395,7 +443,8 @@ namespace TraderForPoe
                                         {
                                             TradeItem tItem = new TradeItem(line);
                                             TradeItemControl uc = new TradeItemControl(tItem);
-                                            stk_MainPnl.Children.Add(uc);
+                                            //stk_MainPnl.Children.Add(uc);
+                                            stk_MainPnl.Children.Insert(0, uc);
                                             var customMenuItem = new CustMenuItem(uc);
                                             customMenuItem.Click += CustomMenuItem_Click;
                                             itmHistory.DropDownItems.Add(customMenuItem);
@@ -419,6 +468,20 @@ namespace TraderForPoe
                                         catch (Exception ex)
                                         {
                                             System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                                        }
+                                        
+                                        Match match = Regex.Match(line, @"@(To|From)\s+(.+?):\s+");
+                                        if (match.Success)
+                                        {
+                                            string customer = match.Groups[2].Value;
+                                            TradeItemControl record = stk_MainPnl.Children.Cast<TradeItemControl>().FirstOrDefault(p => p.tItem.Customer == customer);
+                                            if (record != default(TradeItemControl))
+                                            {
+                                                record.chatHistory += Regex.Replace(line, @"^.+\@(.+?)\s+(.+)$", m => (m.Groups[1].Value + " " + m.Groups[2].Value + "\n"));
+                                                record.txt_Customer.ToolTip = record.chatHistory;
+                                                stk_MainPnl.Children.Remove(record);
+                                                stk_MainPnl.Children.Insert(0, record);
+                                            }
                                         }
                                     }
                                 }
@@ -538,19 +601,25 @@ namespace TraderForPoe
         {
             if (mainWindowCollapsed == false)
             {
-                btn_collapseMainWindow.Width = this.Width;
-                btn_collapseMainWindow.Content = "⏷";
+                //btn_collapseMainWindow.Width = this.Width;
+                btn_collapseMainWindow.Content = ">";
                 stk_MainPnl.Visibility = Visibility.Collapsed;
+                //stk_ControlPnl.Visibility = Visibility.Visible;
                 mainWindowCollapsed = true;
             }
             else
             {
-                btn_collapseMainWindow.Width = btn_collapseMainWindow.MinWidth;
-                btn_collapseMainWindow.Content = "⏶";
+                //btn_collapseMainWindow.Width = btn_collapseMainWindow.MinWidth;
+                btn_collapseMainWindow.Content = "^";
                 stk_MainPnl.Visibility = Visibility.Visible;
                 mainWindowCollapsed = false;
             }
-
+        }
+        
+        private void ClickClearRecords(object sender, RoutedEventArgs e)
+        {
+            List<TradeItemControl> l = stk_MainPnl.Children.Cast<TradeItemControl>().ToList();
+            l.ForEach(element => element.RemoveItem());
         }
     }
 }
